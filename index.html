@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atlas | Build a travel brief</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <h1 class="brand-name">Atlas</h1>
+          <span class="brand-context">Travel brief builder</span>
+        </div>
+        <button class="text-button" id="newTripButton" type="button">New brief</button>
+      </header>
+
+      <main class="workspace">
+        <section class="cloud-panel" id="cloudPanel" aria-labelledby="cloudHeading">
+          <h2 class="sr-only" id="cloudHeading">Travel preference word cloud</h2>
+          <div class="cloud-toolbar">
+            <nav class="branch-trail" id="branchTrail" aria-label="Preference path"></nav>
+          </div>
+          <div class="cloud-world" id="cloudWorld">
+            <canvas
+              class="cloud"
+              id="wordCloud"
+              role="img"
+              aria-label="Interactive travel preference word cloud. Use the matching buttons in the question panel for keyboard selection."
+            ></canvas>
+            <span class="hover-word" id="hoverWord" aria-hidden="true"></span>
+            <div class="cloud-fallback" id="cloudFallback" aria-label="Travel preference words"></div>
+          </div>
+          <div class="cloud-hint" aria-hidden="true">
+            <span>Hover to enlarge</span>
+            <span>•</span>
+            <span>Click to follow a branch</span>
+            <span>•</span>
+            <span>Drag to pan</span>
+          </div>
+          <button class="reset-view" id="resetViewButton" type="button">Reset view</button>
+        </section>
+
+        <aside class="question-panel" aria-label="Trip discovery">
+          <div class="question-inner">
+            <div id="questionState">
+              <section class="trip-basics" aria-labelledby="basicsTitle">
+                <div class="section-heading-row">
+                  <div>
+                    <p class="section-label">Trip basics</p>
+                    <h2 id="basicsTitle">Set the trip up</h2>
+                  </div>
+                  <span class="captured-count" id="capturedCount">0 preferences</span>
+                </div>
+
+                <div class="setup-accordion" id="setupAccordion">
+                  <details class="setup-step" id="travellersDetails" data-setup-step="travellers" open>
+                    <summary>
+                      <span>Travellers</span>
+                      <span class="setup-summary" id="travellersSummary">Choose party</span>
+                      <span class="accordion-mark" aria-hidden="true"></span>
+                    </summary>
+                    <div class="setup-content">
+                      <div class="party-options" id="partyOptions" role="group" aria-label="Travel party">
+                        <button type="button" data-party="Single" aria-pressed="false">Single</button>
+                        <button type="button" data-party="Couple" aria-pressed="false">Couple</button>
+                        <button type="button" data-party="Family" aria-pressed="false">Family</button>
+                        <button type="button" data-party="Friends" aria-pressed="false">Friends</button>
+                        <button type="button" data-party="Group" aria-pressed="false">Group</button>
+                      </div>
+
+                      <div class="traveller-strip">
+                        <span class="field-label" id="travellerLabel">Number of people</span>
+                        <div class="stepper" aria-labelledby="travellerLabel">
+                          <button type="button" id="decreaseTravellers" aria-label="Remove one traveller">−</button>
+                          <output id="travellerCount" aria-live="polite">1</output>
+                          <button type="button" id="increaseTravellers" aria-label="Add one traveller">+</button>
+                        </div>
+                      </div>
+                    </div>
+                  </details>
+
+                  <details class="setup-step" id="destinationDetails" data-setup-step="destination">
+                    <summary>
+                      <span>Destination</span>
+                      <span class="setup-summary" id="destinationSummaryText">Not set</span>
+                      <span class="accordion-mark" aria-hidden="true"></span>
+                    </summary>
+                    <div class="setup-content destination-setup">
+                      <div class="setup-heading">
+                        <label class="field-label" for="destinationInput">Destination</label>
+                        <span class="setup-note" id="destinationModeHint">Exact place</span>
+                      </div>
+                      <div class="mode-switch" id="destinationModes" role="group" aria-label="Destination flexibility">
+                        <button type="button" data-destination-mode="exact" aria-pressed="true">I know where</button>
+                        <button type="button" data-destination-mode="flexible" aria-pressed="false">I'm flexible</button>
+                      </div>
+                      <input class="destination-input" id="destinationInput" type="text" maxlength="60" autocomplete="off" placeholder="City, country, or region" />
+                      <div class="quick-picks" id="destinationSuggestions" aria-label="Quick destination choices"></div>
+                    </div>
+                  </details>
+
+                  <details class="setup-step" id="budgetDetails" data-setup-step="budget">
+                    <summary>
+                      <span>Budget</span>
+                      <span class="setup-summary" id="budgetSummaryText">Not set</span>
+                      <span class="accordion-mark" aria-hidden="true"></span>
+                    </summary>
+                    <div class="setup-content budget-setup">
+                      <div class="setup-heading">
+                        <span class="field-label" id="budgetLabel">Budget per person</span>
+                        <span class="setup-note">Trip estimate</span>
+                      </div>
+                      <div class="budget-options" id="budgetOptions" role="group" aria-labelledby="budgetLabel">
+                        <button type="button" data-budget="Under $2,000" aria-pressed="false">Under $2k</button>
+                        <button type="button" data-budget="$2,000 to $4,000" aria-pressed="false">$2k to $4k</button>
+                        <button type="button" data-budget="$4,000 to $8,000" aria-pressed="false">$4k to $8k</button>
+                        <button type="button" data-budget="$8,000+" aria-pressed="false">$8k+</button>
+                        <button type="button" data-budget="Flexible" aria-pressed="false">Flexible</button>
+                        <button type="button" data-budget="custom" aria-pressed="false">Custom</button>
+                      </div>
+                      <div class="custom-budget" id="customBudget" hidden>
+                        <div class="range-row">
+                          <label for="budgetMin">From</label>
+                          <input id="budgetMin" type="range" min="500" max="19500" step="500" value="2000" />
+                          <output id="budgetMinOutput" for="budgetMin">$2,000</output>
+                        </div>
+                        <div class="range-row">
+                          <label for="budgetMax">To</label>
+                          <input id="budgetMax" type="range" min="1000" max="20000" step="500" value="6000" />
+                          <output id="budgetMaxOutput" for="budgetMax">$6,000</output>
+                        </div>
+                        <button class="apply-range" id="applyBudgetRange" type="button">Use this range</button>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              </section>
+
+              <section class="discovery-panel" aria-labelledby="questionTitle">
+                <div class="question-copy">
+                  <p class="section-label" id="depthLabel">Starting wide</p>
+                  <h2 id="questionTitle" tabindex="-1">What should shape the trip?</h2>
+                  <p id="questionHelp">Choose a word. Atlas will open a more precise set of ideas.</p>
+                </div>
+
+                <div class="choices" id="choices" aria-labelledby="questionTitle"></div>
+
+                <form class="custom-tag" id="customTagForm" novalidate>
+                  <label class="field-label" for="customTagInput">Add a detail that is missing</label>
+                  <div class="input-row">
+                    <input
+                      id="customTagInput"
+                      name="customTag"
+                      type="text"
+                      maxlength="32"
+                      autocomplete="off"
+                      placeholder="e.g. mid-century design"
+                      aria-describedby="fieldMessage"
+                    />
+                    <button class="add-button" type="submit">Add</button>
+                  </div>
+                  <p class="field-message" id="fieldMessage" aria-live="polite"></p>
+                </form>
+
+                <div class="tree-actions">
+                  <button class="back-button" id="backButton" type="button" hidden>Back one level</button>
+                  <button class="secondary-button" id="anotherBranchButton" type="button" hidden>Explore another branch</button>
+                  <button class="primary-button" id="reviewBriefButton" type="button">Review brief</button>
+                </div>
+              </section>
+            </div>
+
+            <section class="review-state" id="reviewState" aria-labelledby="reviewTitle" hidden>
+              <span class="review-kicker">Brief ready</span>
+              <h2 id="reviewTitle">A useful starting point for the itinerary.</h2>
+              <p>Review the trip basics and the paths you explored, then send the brief to the chat.</p>
+              <dl class="review-list" id="reviewList"></dl>
+              <div class="review-actions">
+                <button class="primary-button" id="sendBriefButton" type="button">Send brief to chat</button>
+                <button class="secondary-button" id="editBriefButton" type="button">Keep exploring</button>
+                <p class="field-message" id="sendStatus" role="status"></p>
+              </div>
+            </section>
+          </div>
+        </aside>
+      </main>
+
+      <section class="trip-brief" aria-labelledby="briefTitle">
+        <div class="brief-heading">
+          <h2 id="briefTitle">Trip brief</h2>
+          <p id="briefStatus">Add the travellers, then follow any branch that matters.</p>
+        </div>
+        <div class="brief-groups" id="briefGroups"></div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="sr-only" id="selectionAnnouncement" aria-live="polite"></div>
+    <script type="module" src="/src/mcp-app.ts"></script>
+  </body>
+</html>
